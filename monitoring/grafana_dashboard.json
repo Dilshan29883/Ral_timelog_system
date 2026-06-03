@@ -1,0 +1,83 @@
+{
+  "dashboard": {
+    "title": "Real-Time Log Monitoring Dashboard",
+    "description": "Grafana dashboard for monitoring log processing pipeline",
+    "tags": ["logs", "streaming", "monitoring"],
+    "refresh": "5s",
+    "time_range": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total Events (Last Hour)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "increase(log_events_total[1h])",
+            "legendFormat": "Events"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Error Rate by Service",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(log_errors_total[5m]) / rate(log_events_total[5m])",
+            "legendFormat": "{{service}}"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Average Response Time",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "avg(log_response_time_ms)",
+            "legendFormat": "Response Time (ms)"
+          }
+        ],
+        "threshold": 5000
+      },
+      {
+        "id": 4,
+        "title": "Top Error Services",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "topk(5, sum by (service) (log_errors_total))",
+            "legendFormat": "{{service}}"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Processing Latency",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "spark_streaming_total_delay_ms",
+            "legendFormat": "Latency (ms)"
+          }
+        ],
+        "max": 10000,
+        "threshold": 5000
+      },
+      {
+        "id": 6,
+        "title": "Active Alerts",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "count(ALERTS{alertname=~\".*Log.*\"})",
+            "legendFormat": "Active Alerts"
+          }
+        ]
+      }
+    ]
+  }
+}

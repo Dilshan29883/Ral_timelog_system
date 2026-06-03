@@ -1,0 +1,70 @@
+groups:
+  - name: log_monitoring_alerts
+    interval: 30s
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          (sum(rate(log_errors_total[5m])) by (service) / 
+           sum(rate(log_events_total[5m])) by (service)) > 0.15
+        for: 5m
+        labels:
+          severity: warning
+          component: logs
+        annotations:
+          summary: "High error rate detected in {{ $labels.service }}"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 15%)"
+
+      - alert: CriticalErrorRate
+        expr: |
+          (sum(rate(log_critical_total[5m])) by (service) / 
+           sum(rate(log_events_total[5m])) by (service)) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          component: logs
+        annotations:
+          summary: "Critical error rate in {{ $labels.service }}"
+          description: "Critical error rate is {{ $value | humanizePercentage }}"
+
+      - alert: HighResponseTime
+        expr: avg by (service) (log_response_time_ms) > 5000
+        for: 5m
+        labels:
+          severity: warning
+          component: logs
+        annotations:
+          summary: "High response time in {{ $labels.service }}"
+          description: "Average response time is {{ $value | humanizeDuration }}"
+
+      - alert: StreamingProcessingLag
+        expr: spark_streaming_total_delay_ms > 10000
+        for: 3m
+        labels:
+          severity: warning
+          component: spark
+        annotations:
+          summary: "Spark streaming has high processing lag"
+          description: "Processing lag is {{ $value | humanizeDuration }}"
+
+      - alert: ConsecutiveErrorSpike
+        expr: |
+          rate(log_errors_total[5m]) > 2 * avg_over_time(rate(log_errors_total[5m])[1h:5m])
+        for: 2m
+        labels:
+          severity: critical
+          component: logs
+        annotations:
+          summary: "Sudden spike in error rate"
+          description: "Error rate spiked {{ $value | humanizePercentage }} above baseline"
+
+      - alert: ServiceDegraded
+        expr: |
+          (sum(rate(log_errors_total[5m])) by (service) / 
+           sum(rate(log_events_total[5m])) by (service)) > 0.25
+        for: 1m
+        labels:
+          severity: critical
+          component: logs
+        annotations:
+          summary: "Service {{ $labels.service }} appears degraded"
+          description: "Severe error rate detected: {{ $value | humanizePercentage }}"
