@@ -1,0 +1,81 @@
+{
+  "app": {
+    "name": "Real-Time Log Monitoring System",
+    "version": "1.0.0",
+    "description": "A distributed system for real-time log processing, anomaly detection, and alerting"
+  },
+  "logging": {
+    "log_level": "INFO",
+    "output_format": "json",
+    "max_bytes": 10485760,
+    "backup_count": 5
+  },
+  "data": {
+    "log_generator": {
+      "num_records": 10000,
+      "batch_size": 100,
+      "services": ["auth-service", "api-gateway", "payment-service", "user-service", "notification-service"],
+      "hosts": ["host-01", "host-02", "host-03", "host-04", "host-05"],
+      "log_levels": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+      "anomaly_percentage": 0.15,
+      "delay_between_batches_ms": 100
+    },
+    "sample_log_path": "data/sample/sample_logs.txt",
+    "raw_log_path": "data/raw/logs.txt"
+  },
+  "spark": {
+    "app_name": "RealTimeLogMonitoring",
+    "master": "local[*]",
+    "log_level": "WARN",
+    "shuffle_partitions": 4,
+    "streaming": {
+      "checkpoint_location": "checkpoint/logs",
+      "trigger_interval_seconds": 5,
+      "window_duration_seconds": 60,
+      "slide_duration_seconds": 10
+    }
+  },
+  "kafka": {
+    "enabled": false,
+    "bootstrap_servers": "localhost:9092",
+    "producer": {
+      "topic": "raw-logs",
+      "batch_size": 100,
+      "acks": "all",
+      "retries": 3
+    },
+    "consumer": {
+      "topic": "raw-logs",
+      "group_id": "log-monitoring-group",
+      "auto_offset_reset": "earliest",
+      "enable_auto_commit": true
+    }
+  },
+  "processing": {
+    "error_keywords": ["error", "failure", "failed", "exception", "critical"],
+    "anomaly_detection": {
+      "enabled": true,
+      "spike_threshold": 2.5,
+      "error_rate_threshold": 0.1,
+      "response_time_threshold_ms": 5000
+    },
+    "aggregation": {
+      "by_service": true,
+      "by_host": true,
+      "by_log_level": true,
+      "by_status_code": true
+    }
+  },
+  "output": {
+    "summary_path": "output/logs_summary",
+    "error_report_path": "output/error_reports",
+    "format": "parquet",
+    "partitioning": ["timestamp_hour", "service"]
+  },
+  "alerting": {
+    "enabled": true,
+    "high_error_rate_threshold": 0.15,
+    "critical_response_time_ms": 10000,
+    "consecutive_errors_threshold": 5
+  }
+}

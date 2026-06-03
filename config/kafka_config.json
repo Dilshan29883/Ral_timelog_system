@@ -1,0 +1,53 @@
+{
+  "kafka": {
+    "bootstrap_servers": ["localhost:9092"],
+    "version": "3.5.0",
+    "api_version": [3, 5, 0],
+    "topics": {
+      "raw_logs": {
+        "name": "raw-logs",
+        "partitions": 3,
+        "replication_factor": 1,
+        "retention_ms": 86400000,
+        "segment_ms": 300000
+      },
+      "processed_logs": {
+        "name": "processed-logs",
+        "partitions": 3,
+        "replication_factor": 1,
+        "retention_ms": 86400000
+      },
+      "alerts": {
+        "name": "log-alerts",
+        "partitions": 1,
+        "replication_factor": 1,
+        "retention_ms": 604800000
+      }
+    },
+    "producer": {
+      "batch_size": 16384,
+      "linger_ms": 10,
+      "compression_type": "snappy",
+      "acks": "all",
+      "retries": 3,
+      "max_in_flight_requests": 5,
+      "enable_idempotence": true
+    },
+    "consumer": {
+      "group_id": "log-monitoring-group",
+      "auto_offset_reset": "earliest",
+      "enable_auto_commit": true,
+      "auto_commit_interval_ms": 5000,
+      "max_poll_records": 500,
+      "session_timeout_ms": 30000
+    }
+  },
+  "security": {
+    "protocol": "PLAINTEXT",
+    "sasl_enabled": false
+  },
+  "monitoring": {
+    "metrics_enabled": true,
+    "jmx_port": 9999
+  }
+}
