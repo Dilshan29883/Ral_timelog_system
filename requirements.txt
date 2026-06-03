@@ -1,0 +1,34 @@
+# Core Data Processing (Pre-built wheels for Python 3.14 compatibility)
+pyspark==3.5.0; python_version < '3.14'
+pyspark==3.5.1; python_version >= '3.14'
+pandas>=2.0.0; python_version < '3.14'
+pandas-stubs>=2.0.0; python_version >= '3.14'
+numpy>=1.24.0; python_version < '3.14'
+numpy>=2.0.0rc1; python_version >= '3.14'
+
+# Data Generation & Utilities
+faker>=22.0.0
+python-json-logger>=2.0.0
+pytz>=2024.1
+
+# Kafka (Community fork for Python 3.14 compatibility)
+kafka-python-ng>=1.7.0
+
+# Logging & Monitoring
+loguru>=0.7.0
+
+# Jupyter & Visualization
+jupyter>=1.0.0
+notebook>=7.0.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+plotly>=5.0.0
+
+# Development Tools
+black>=24.0.0
+flake8>=7.0.0
+pytest>=7.0.0
+
+# Configuration
+pyyaml>=6.0
+python-dotenv>=1.0.0

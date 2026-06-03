@@ -1,0 +1,108 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - log-monitoring
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      # FIXED LISTENERS
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 24
+    networks:
+      - log-monitoring
+
+  spark-master:
+    image: apache/spark:3.5.1
+    container_name: spark-master
+    ports:
+      - "8080:8080"   # Spark UI
+      - "7077:7077"   # Spark master
+    command:
+      - /opt/spark/bin/spark-class
+      - org.apache.spark.deploy.master.Master
+      - --host
+      - 0.0.0.0
+      - --port
+      - "7077"
+      - --webui-port
+      - "8080"
+    volumes:
+      - ./spark:/opt/spark-apps
+      - ./data:/opt/data
+      - ./output:/opt/output
+    networks:
+      - log-monitoring
+
+  spark-worker:
+    image: apache/spark:3.5.1
+    container_name: spark-worker
+    depends_on:
+      - spark-master
+    ports:
+      - "8081:8081"   # Worker UI
+    command:
+      - /opt/spark/bin/spark-class
+      - org.apache.spark.deploy.worker.Worker
+      - spark://spark-master:7077
+      - --host
+      - 0.0.0.0
+      - --port
+      - "7078"
+      - --webui-port
+      - "8081"
+      - --cores
+      - "2"
+      - --memory
+      - 2G
+    volumes:
+      - ./spark:/opt/spark-apps
+      - ./data:/opt/data
+      - ./output:/opt/output
+    networks:
+      - log-monitoring
+
+  jupyter:
+    image: jupyter/minimal-notebook:latest
+    container_name: jupyter
+    depends_on:
+      - spark-master
+      - kafka
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_TOKEN=dev
+      - SPARK_MASTER=spark://spark-master:7077
+    volumes:
+      - ./notebooks:/home/jovyan/notebooks
+      - ./data:/home/jovyan/data
+      - ./output:/home/jovyan/output
+      - ./spark:/home/jovyan/spark
+    command: start-notebook.sh --NotebookApp.token='dev' --NotebookApp.password=''
+    networks:
+      - log-monitoring
+
+networks:
+  log-monitoring:
+    driver: bridge
