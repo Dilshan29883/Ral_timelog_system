@@ -1,0 +1,5 @@
+window_start,window_end,service,event_count,avg_response_time_ms,max_response_time_ms,min_response_time_ms,server_error_count,client_error_count,error_rate,processing_timestamp,is_high_latency,is_high_error_rate,is_anomaly,anomaly_type
+2026-04-30 14:10:00,2026-04-30 14:11:00,user-service,2,832.5,1423.0,242.0,1,2,1.5,2026-04-30 14:10:37.097577,False,True,True,HIGH_ERROR_RATE
+2026-04-30 14:10:00,2026-04-30 14:11:00,notification-service,1,118.0,118.0,118.0,0,1,1.0,2026-04-30 14:10:37.097577,False,True,True,HIGH_ERROR_RATE
+2026-04-30 14:10:00,2026-04-30 14:11:00,api-gateway,3,157.66666666666666,223.0,67.0,0,3,1.0,2026-04-30 14:10:37.097577,False,True,True,HIGH_ERROR_RATE
+2026-04-30 14:10:00,2026-04-30 14:11:00,auth-service,4,682.0,1951.0,188.0,2,4,1.5,2026-04-30 14:10:37.097577,False,True,True,HIGH_ERROR_RATE
